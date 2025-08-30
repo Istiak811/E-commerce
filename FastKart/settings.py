@@ -55,6 +55,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "FastKart.urls"
 
+AUTH_USER_MODEL = 'Accounts.CustomUser'
+
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
