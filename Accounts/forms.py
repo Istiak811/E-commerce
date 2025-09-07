@@ -9,7 +9,7 @@ class CustomUserCreationForm(UserCreationForm):
         model = models.CustomUser
         feilds = ('username', 'email', 'password1', 'password2')
 
-class Customauthenticationform(AuthenticationForm):
+class CustomAuthenticationform(AuthenticationForm):
     class Meta:
         model = models.CustomUser
         feilds = ('username', 'email')
