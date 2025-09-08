@@ -12,7 +12,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from .forms import CustomAuthenticationform,CustomPasswordResetForm,CustomSetPasswordForm,CustomUserChangeForm,CustomUserCreationForm
 from .models import CustomUser,UserProfile
 from django.views.decorators.csrf import csrf_exempt
-
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 # Create your views here.
 
@@ -65,7 +66,7 @@ def signup(request):
             messages.success(request, "Registration is done.Please Verify the mail.")
 
             current_site = get_current_site(request)
-            verification_link = f"http://{current_site.domain}/accounts/verify/{urlsafe_base64_encode{force_bytes(user.pk)}}/{default_token_generator.make_token(user)}"
+            verification_link = f"http://{current_site.domain}/accounts/verify/{urlsafe_base64_encode(force_bytes(user.pk))}/{default_token_generator.make_token(user)}"
             send_verification_email(user, verification_link)
             return redirect('login')
         except Exception as e:
@@ -73,3 +74,53 @@ def signup(request):
             messages.error(request, "An error occured while creating account. Please Try again")
             return redirect('signup')
     return render(request, 'accounts/sign-up.html')
+
+def send_verification_email(user, verification_link):
+    email_subject = 'Verify your email address.'
+    email_body = render_to_string('accounts/verification_email.html',{
+        'user':user,
+        'verification_link':verification_link
+    })
+    email = EmailMessage(
+        subject=email_subject,
+        body=email_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email]
+    )
+
+    email.content_subtype = 'html'
+    email.send()
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = CustomUser.objects.get(pk=uid)
+
+    except(TypeError,ValueError,OverflowError,CustomUser.DoesNotExist):
+        user = None
+    
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_verified = True
+        user.save()
+        messages.success(request, "Your email verified successfully")
+        return redirect('login')
+    else:
+        messages.error(request, 'The email verification failed')
+        return redirect('signup')
+    
+@csrf_exempt
+def user_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, email=email,password=password)
+
+        if user is not None and user.is_verified:
+            login(request, user)
+            return redirect('user_dashboard')
+        
+    return render(request, 'accounts/login.html')
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect('home')
