@@ -124,3 +124,90 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('home')
+
+def password_reset(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = None
+
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            print("User doesn't exists.")
+            messages.error(request, "User doesn't exists.")
+            return redirect('password_reset')
+        if user:
+            current_site = get_current_site(request)
+            subject = 'Reset your password.'
+            verification_link = f"http://{current_site.domain}/accounts/password_reset_confirm/{urlsafe_base64_encode(force_bytes(user.pk))}/{default_token_generator.make_token(user)}"
+            send_password_reset_email(user,verification_link)
+            print("Email sent")
+            return redirect('login')
+        return render(request,"accounts/forgot.html")
+
+def send_password_reset_email(user, verification_link):
+    email_subject = 'Reset your password.'
+    email_body = render_to_string('accounts/verification_email.html',{
+        'user':user,
+        'verification_link':verification_link
+    })
+    email = EmailMessage(
+        subject=email_subject,
+        body=email_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email]
+    )
+
+    email.content_subtype = 'html'
+    email.send()
+
+
+def password_reset_confirm(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = CustomUser.objects.get(pk=uid)
+    except(TypeError,ValueError,OverflowError,CustomUser.DoesNotExist):
+        user = None
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_verified = True
+        user.save()
+        return redirect('newpassword')
+    else:
+        messages.error(request, "The verfication link expired.")
+        return redirect('signup')
+    
+def newpassword(request):
+    if request.method == 'POST':
+        password = request.POST.get('password')
+        user = request.user
+        user.set_password(password)
+        user.save()
+        messages.success(request, 'Password updated.')
+        return redirect('login')
+    return render(request, 'accounts/newpassword.html')
+@login_required
+def update_profile(request):
+    user = request.user
+    user_profile = user.userprofile
+
+    if request.method == 'POST':
+        user.username = request.POST.get('username', user.username)
+        user.email = request.POST.get('username', user.email)
+        user.save()
+
+        user_profile.mobile = request.POST.get('mobile', user_profile.mobile)
+        user_profile.address_1 = request.POST.get('address_1', user_profile.address_1)
+        user_profile.address_2 = request.POST.get('address_2', user_profile.address_2)
+        user_profile.city = request.POST.get('city', user_profile.city)
+        user_profile.state = request.POST.get('state', user_profile.state)
+        user_profile.country = request.POST.get('country', user_profile.country)
+
+        user_profile.save()
+
+        return redirect('profile')
+    user_info = CustomUser.objects.get(id = user.id)
+    context = {
+        'user_info' : user_info,
+    }
+    return render(request, 'accounts/user-dashboard.html', context)
+

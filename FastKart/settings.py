@@ -146,3 +146,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("istiakhossenshihab@gmail.com")
 EMAIL_HOST_PASSWORD = os.getenv("ckyf datr vhpl vgxg")
+
+AUTHENTICATION_BACKENDS = [
+    'accounts.authentication.EmailBackend',#Custom Backends
+    'django.contrib.auth.backends.ModelBackend'#default Backend
+]
