@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 from django.db.models import Avg, Count
+from Accounts.models import CustomUser
 
 # Create your models here.
 class Category(models.Model):
@@ -80,3 +81,14 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.name}"
     
+class review(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='review')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user')
+    rating = models.FloatField
+    review = models.TextField(max_length=500, blank=True)
+    status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'review by {self.user.username} for {self.product.name}'
