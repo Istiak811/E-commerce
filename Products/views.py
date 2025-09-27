@@ -80,3 +80,6 @@ def submit_review(request, product_slug):
                 data.save()
                 messages.success(request, 'Thank you!')
                 return redirect(url)
+            
+def shop_left_sidebar(request):
+    return render(request, 'products/shop-left-sidebar.html')

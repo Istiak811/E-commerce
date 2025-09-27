@@ -2,7 +2,6 @@ from django.db import models
 from django.utils.text import slugify
 from django.db.models import Avg, Count
 from Accounts.models import CustomUser
-
 # Create your models here.
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
@@ -53,7 +52,7 @@ class Product(models.Model):
             return self.price
         
     class Meta:
-        ordering = ('-created')
+        ordering = ('-created_at',)
 
     def __str__(self) -> str:
         return self.name
@@ -81,10 +80,10 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.name}"
     
-class review(models.Model):
+class Review(models.Model):
     product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='review')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user')
-    rating = models.FloatField
+    rating = models.FloatField(default=0)
     review = models.TextField(max_length=500, blank=True)
     status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

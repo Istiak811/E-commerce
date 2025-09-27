@@ -5,4 +5,4 @@ from . import models
 admin.site.register(models.Category)
 admin.site.register(models.Product)
 admin.site.register(models.ProductImage)
-admin.site.register(models.review)
+admin.site.register(models.Review)

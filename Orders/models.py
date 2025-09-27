@@ -1,6 +1,6 @@
 from django.db import models
 from Accounts.models import CustomUser,UserProfile
-from Products import models
+from Products.models import Product
 
 # Create your models here.
 class Payment(models.Model):
@@ -52,7 +52,7 @@ class OrderProduct(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    qty = models.IntegerField()
     product_price = models.FloatField()
     ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

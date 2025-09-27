@@ -7,12 +7,12 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = models.CustomUser
-        feilds = ('username', 'email', 'password1', 'password2')
+        fields = ('username', 'email', 'password1', 'password2')
 
 class CustomAuthenticationform(AuthenticationForm):
     class Meta:
         model = models.CustomUser
-        feilds = ('username', 'email')
+        fields = ('username', 'email')
 
 class CustomPasswordResetForm(PasswordResetForm):
     email = forms.EmailField(required=True)
@@ -20,14 +20,14 @@ class CustomPasswordResetForm(PasswordResetForm):
 class CustomSetPasswordForm(SetPasswordForm):
     class Meta:
         model = models.CustomUser
-        feilds = ('new_password1', 'new_password2')
+        fields = ('new_password1', 'new_password2')
 
 class CustomUserChangeForm(UserChangeForm):
     password = None
 
     class Meta:
         model = models.CustomUser
-        feilds = ('username', 'email', 'first_name', 'last_name')
+        fields = ('username', 'email', 'first_name', 'last_name')
 
         def  __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
